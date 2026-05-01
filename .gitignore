@@ -1,0 +1,28 @@
+[Ll]ibrary/
+[Tt]emp/
+[Oo]bj/
+[Bb]uild/
+[Bb]uilds/
+[Ll]ogs/
+UserSettings/
+
+# Archivos de sistema
+.DS_Store
+Thumbs.db
+
+# Visual Studio / Rider
+.vs/
+*.csproj
+*.unityproj
+*.sln
+*.user
+*.userprefs
+*.pidb
+*.booproj
+*.svd
+
+# Cache
+*.log
+*.tmp
+*.bak
+*.swp
