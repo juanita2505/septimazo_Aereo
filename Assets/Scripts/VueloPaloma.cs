@@ -23,6 +23,14 @@ public class VueloPalomaGaze : MonoBehaviour
     private float velocidadActual;
     private float yawAcumulado;
 
+    [Header("Modo Testing PC")]
+    public bool usarModoTesting = true;
+    public float velocidadMovimientoTesting = 10f;
+    public float sensibilidadMouse = 2f;
+
+    private float rotacionX = 0f;
+    private float rotacionY = 0f;
+
     void OnEnable()
     {
         if (acelerarAction.action != null) acelerarAction.action.Enable();
@@ -36,12 +44,22 @@ public class VueloPalomaGaze : MonoBehaviour
         if (GetComponent<Rigidbody>()) GetComponent<Rigidbody>().isKinematic = true;
         
         if (camaraHead == null) camaraHead = Camera.main.transform;
+
+        Cursor.lockState = CursorLockMode.Locked;
+        Cursor.visible = false;
     }
 
     void Update()
     {
-        ManejarVelocidad();
-        ManejarDireccionGaze();
+            if (usarModoTesting)
+            {
+                ModoTestingPC();
+                return;
+            }
+
+            ManejarVelocidad();
+            ManejarDireccionGaze();
+        
     }
 
     void ManejarVelocidad()
@@ -98,5 +116,28 @@ public class VueloPalomaGaze : MonoBehaviour
 
         // 5. Movimiento
         transform.position += transform.forward * velocidadActual * Time.deltaTime;
+    }
+    void ModoTestingPC()
+    {
+        // 🔶 MOVIMIENTO (WASD + subir/bajar)
+        float h = Input.GetAxis("Horizontal"); // A D
+        float v = Input.GetAxis("Vertical");   // W S
+
+        float subir = 0f;
+        if (Input.GetKey(KeyCode.Space)) subir = 1f;
+        if (Input.GetKey(KeyCode.LeftControl)) subir = -1f;
+
+        Vector3 direccion = new Vector3(h, subir, v);
+        transform.Translate(direccion * velocidadMovimientoTesting * Time.deltaTime);
+
+        // 🔶 ROTACIÓN CON MOUSE
+        float mouseX = Input.GetAxis("Mouse X") * sensibilidadMouse * 100f * Time.deltaTime;
+        float mouseY = Input.GetAxis("Mouse Y") * sensibilidadMouse * 100f * Time.deltaTime;
+
+        rotacionY += mouseX;
+        rotacionX -= mouseY;
+        rotacionX = Mathf.Clamp(rotacionX, -80f, 80f);
+
+        transform.rotation = Quaternion.Euler(rotacionX, rotacionY, 0f);
     }
 }
