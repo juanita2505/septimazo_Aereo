@@ -5,40 +5,33 @@ public class ZonaDescarga : MonoBehaviour
     [Header("UI")]
     public GameObject indicadorUI;
     public GameObject overlayAmarillo;
+    public GameObject ventanaCamara;
 
-    [Header("Debug")]
-    public int nivelZona = 1;
-
-    [Header("Input")]
-    public KeyCode teclaDescarga = KeyCode.X;
-
-    private bool enZona = false;
-    private CanvasGroup canvasGroup;
-
-    [Header("Zonas")]
+    [Header("Niveles")]
     public GameObject zonaNivel1;
     public GameObject zonaNivel2;
     public GameObject zonaNivel3;
 
+    [Header("Camara")]
     public CamaraDescarga camaraDescarga;
+
+    [Header("Destino")]
+    public Transform destinoCaida;
+
+    [Header("Input")]
+    public KeyCode teclaDescarga = KeyCode.X;
+
+    [Header("Debug")]
+    public int nivelZona = 1;
+
+    private bool enZona = false;
+    private CanvasGroup canvasGroup;
 
     void Start()
     {
-        //Detectar nivel segun el nombre del objeto
-        if (gameObject.name.ToLower().Contains("zonauno"))
-        {
-            nivelZona = 1;
-        }
-        else if (gameObject.name.ToLower().Contains("zonados"))
-        {
-            nivelZona = 2;
-        }
-        else if (gameObject.name.ToLower().Contains("zonatres"))
-        {
-            nivelZona = 3;
-        }
-
-        Debug.Log("Esta zona es nivel: " + nivelZona);
+        if (gameObject.name.ToLower().Contains("zonauno")) nivelZona = 1;
+        else if (gameObject.name.ToLower().Contains("zonados")) nivelZona = 2;
+        else if (gameObject.name.ToLower().Contains("zonatres")) nivelZona = 3;
 
         if (indicadorUI != null)
             indicadorUI.SetActive(false);
@@ -46,106 +39,119 @@ public class ZonaDescarga : MonoBehaviour
         if (overlayAmarillo != null)
         {
             canvasGroup = overlayAmarillo.GetComponent<CanvasGroup>();
-
             if (canvasGroup == null)
                 canvasGroup = overlayAmarillo.AddComponent<CanvasGroup>();
 
             canvasGroup.alpha = 0f;
+            overlayAmarillo.SetActive(false);
         }
+
+        if (ventanaCamara != null)
+            ventanaCamara.SetActive(false);
     }
 
     void Update()
     {
-        // SOLO el fade depende del canvasGroup
         if (canvasGroup != null)
         {
             float objetivo = enZona ? 0.3f : 0f;
-
-            canvasGroup.alpha = Mathf.Lerp(
-                canvasGroup.alpha,
-                objetivo,
-                Time.deltaTime * 5f
-            );
+            canvasGroup.alpha = Mathf.Lerp(canvasGroup.alpha, objetivo, Time.deltaTime * 5f);
         }
 
-        // INPUT SIEMPRE ACTIVO
         if (enZona && Input.GetKeyDown(teclaDescarga))
         {
-            Debug.Log("DESCARGA ACTIVADA en nivel: " + nivelZona);
             EjecutarDescarga();
         }
     }
 
     private void OnTriggerEnter(Collider other)
     {
-        if (other.CompareTag("Pico"))
-        {
-            Debug.Log("Entraste a zona nivel: " + nivelZona);
+        if (!other.CompareTag("Pico")) return;
 
-            enZona = true;
+        enZona = true;
 
-            if (indicadorUI != null)
-                indicadorUI.SetActive(true);
+        if (indicadorUI != null)
+            indicadorUI.SetActive(true);
 
-            if (overlayAmarillo != null)
-                overlayAmarillo.SetActive(true);
-        }
+        if (overlayAmarillo != null)
+            overlayAmarillo.SetActive(true);
     }
 
     private void OnTriggerExit(Collider other)
     {
-        if (other.CompareTag("Pico"))
-        {
-            Debug.Log("Saliste de zona nivel: " + nivelZona);
+        if (!other.CompareTag("Pico")) return;
 
-            enZona = false;
+        enZona = false;
 
-            if (indicadorUI != null)
-                indicadorUI.SetActive(false);
+        if (indicadorUI != null)
+            indicadorUI.SetActive(false);
 
-        }
+        if (overlayAmarillo != null)
+            overlayAmarillo.SetActive(false);
     }
 
     void EjecutarDescarga()
     {
-        Transform pico = GameObject.FindGameObjectWithTag("Pico").transform;
-        Debug.Log("Hiciste la descarga correctamente");
+        Debug.Log("DESCARGA ACTIVADA");
+
+        enZona = false;
+
+        if (indicadorUI != null)
+            indicadorUI.SetActive(false);
+
+        if (overlayAmarillo != null)
+            overlayAmarillo.SetActive(false);
+
+        if (ventanaCamara != null)
+            ventanaCamara.SetActive(true);
+
+        GameObject picoObj = GameObject.FindGameObjectWithTag("Pico");
+        if (picoObj == null)
+        {
+            Debug.LogError("No se encontró el Pico");
+            return;
+        }
+
+        if (camaraDescarga == null)
+        {
+            Debug.LogError("CamaraDescarga no asignada");
+            return;
+        }
+
+        if (destinoCaida == null)
+        {
+            Debug.LogError("No asignaste destinoCaida en el Inspector para esta zona.");
+            return;
+        }
+
+        camaraDescarga.Activar(
+            picoObj.transform.position,
+            destinoCaida,
+            this
+        );
+    }
+
+    public void FinalizarAnimacionDescarga()
+    {
+        if (ventanaCamara != null)
+            ventanaCamara.SetActive(false);
 
         if (nivelZona == 1)
         {
             Debug.Log("Desbloqueaste nivel 2");
-            zonaNivel1.SetActive(false);
-            zonaNivel2.SetActive(true);
-            // Posición inicial (desde donde "sale")
-            Vector3 inicio = pico.position;
-
-            // Rotación mirando hacia abajo
-            Quaternion rot = Quaternion.Euler(90f, pico.eulerAngles.y, 0f);
-
-            // Activar cámara
-            camaraDescarga.Activar(inicio, rot);
+            if (zonaNivel1 != null) zonaNivel1.SetActive(false);
+            if (zonaNivel2 != null) zonaNivel2.SetActive(true);
         }
         else if (nivelZona == 2)
         {
             Debug.Log("Desbloqueaste nivel 3");
-
-            zonaNivel2.SetActive(false);
-            zonaNivel3.SetActive(true);
+            if (zonaNivel2 != null) zonaNivel2.SetActive(false);
+            if (zonaNivel3 != null) zonaNivel3.SetActive(true);
         }
         else if (nivelZona == 3)
         {
             Debug.Log("GANASTE");
-
-            zonaNivel3.SetActive(false);
-
-            enZona = false;
-
-            if (indicadorUI != null)
-                indicadorUI.SetActive(false);
-
-            if (overlayAmarillo != null)
-                overlayAmarillo.SetActive(false);
+            if (zonaNivel3 != null) zonaNivel3.SetActive(false);
         }
     }
-
 }
