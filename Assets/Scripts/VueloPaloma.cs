@@ -4,140 +4,210 @@ using UnityEngine.InputSystem;
 public class VueloPalomaGaze : MonoBehaviour
 {
     [Header("Referencias")]
-    public Transform camaraHead; // Arrastra la Main Camera aquí
+    public Transform camaraHead;
 
     [Header("Configuración de Vuelo")]
     public float velocidadBase = 5f;
     public float velocidadMaxima = 30f;
     public float suavizadoGiro = 3f;
-    public float zonaMuertaGrados = 5f; // Grados de inclinación ignorados
+    public float zonaMuertaGrados = 5f;
 
-    [Header("Límites de la Media Esfera")]
-    public float limiteGiroHorizontal = 60f; // Máximo ángulo de cuello para girar
-    public float limiteGiroVertical = 45f;   // Máximo ángulo de cuello para subir/bajar
+    [Header("Límites")]
+    public float limiteGiroHorizontal = 60f;
+    public float limiteGiroVertical = 45f;
 
-    [Header("Inputs")]
+    [Header("Input")]
     public InputActionProperty acelerarAction;
     public InputActionProperty desacelerarAction;
+
+    [Header("Testing")]
+    public bool usarModoTesting = false;
+    public float velocidadMovimientoTesting = 10f;
+    public float sensibilidadMouse = 2f;
 
     private float velocidadActual;
     private float yawAcumulado;
 
-    [Header("Modo Testing PC")]
-    public bool usarModoTesting = true;
-    public float velocidadMovimientoTesting = 10f;
-    public float sensibilidadMouse = 2f;
+    private Rigidbody rb;
 
-    private float rotacionX = 0f;
-    private float rotacionY = 0f;
+    float rotacionX;
+    float rotacionY;
 
     void OnEnable()
     {
-        if (acelerarAction.action != null) acelerarAction.action.Enable();
-        if (desacelerarAction.action != null) desacelerarAction.action.Enable();
+        acelerarAction.action?.Enable();
+        desacelerarAction.action?.Enable();
     }
 
     void Start()
     {
+        rb = GetComponent<Rigidbody>();
+
         velocidadActual = velocidadBase;
         yawAcumulado = transform.eulerAngles.y;
-        if (GetComponent<Rigidbody>()) GetComponent<Rigidbody>().isKinematic = true;
-        
-        if (camaraHead == null) camaraHead = Camera.main.transform;
 
-        Cursor.lockState = CursorLockMode.Locked;
-        Cursor.visible = false;
+        if (camaraHead == null)
+            camaraHead = Camera.main.transform;
     }
 
-    void Update()
+    void FixedUpdate()
     {
-            if (usarModoTesting)
-            {
-                ModoTestingPC();
-                return;
-            }
+        if (usarModoTesting)
+        {
+            ModoTestingPC();
+            return;
+        }
 
-            ManejarVelocidad();
-            ManejarDireccionGaze();
-        
+        ManejarVelocidad();
+        ManejarDireccionGaze();
+    }
+
+    void LateUpdate()
+    {
+        if (!usarModoTesting && camaraHead != null)
+        {
+            // Mantiene centrada la posición física del visor
+            // pero conserva la rotación (mirar arriba/abajo/izquierda/derecha)
+
+            Vector3 posLocal = camaraHead.localPosition;
+
+            posLocal.x = 0f;
+            posLocal.y = 0f;
+            posLocal.z = 0f;
+
+            camaraHead.localPosition = posLocal;
+        }
     }
 
     void ManejarVelocidad()
     {
-        float acc = acelerarAction.action.ReadValue<float>();
-        float dec = desacelerarAction.action.ReadValue<float>();
+        Vector2 move = acelerarAction.action.ReadValue<Vector2>();
+
+        // adelante joystick = +1
+        float avance = move.y;
 
         float objetivo = velocidadBase;
-        if (dec > 0.05f) objetivo = Mathf.Lerp(velocidadBase, 0, dec);
-        else if (acc > 0.05f) objetivo = Mathf.Lerp(velocidadBase, velocidadMaxima, acc);
 
-        velocidadActual = Mathf.MoveTowards(velocidadActual, objetivo, 10f * Time.deltaTime);
+        if (avance > 0.1f)
+        {
+            objetivo = Mathf.Lerp(
+                velocidadBase,
+                velocidadMaxima,
+                avance
+            );
+        }
+
+        float freno = desacelerarAction.action.ReadValue<float>();
+
+        if (freno > 0.1f)
+        {
+            objetivo = Mathf.Lerp(
+                velocidadBase,
+                0,
+                freno
+            );
+        }
+
+        velocidadActual = Mathf.MoveTowards(
+            velocidadActual,
+            objetivo,
+            10f * Time.deltaTime
+        );
     }
 
     void ManejarDireccionGaze()
     {
-        // 1. Obtener rotación local de la cámara respecto al XR Origin
-        // Normalizamos los ángulos para que vayan de -180 a 180
-        Vector3 rotRotativa = camaraHead.localEulerAngles;
-        float pitchHead = (rotRotativa.x > 180) ? rotRotativa.x - 360 : rotRotativa.x;
-        float yawHead = (rotRotativa.y > 180) ? rotRotativa.y - 360 : rotRotativa.y;
+        Vector3 rot = camaraHead.localEulerAngles;
 
-        // 2. Procesar Input Vertical (Pitch)
-        float pitchFinal = 0f;
-        if (Mathf.Abs(pitchHead) > zonaMuertaGrados)
+        float pitch =
+            rot.x > 180 ? rot.x - 360 : rot.x;
+
+        float yaw =
+            rot.y > 180 ? rot.y - 360 : rot.y;
+
+        float pitchFinal = 0;
+
+        if (Mathf.Abs(pitch) > zonaMuertaGrados)
         {
-            // Mapeo: si miro 45° arriba, la paloma sube
-            float inputVertical = Mathf.Clamp(pitchHead / limiteGiroVertical, -1f, 1f);
-            pitchFinal = inputVertical * 85f; 
+            pitchFinal =
+                Mathf.Clamp(
+                    pitch / limiteGiroVertical,
+                    -1f,
+                    1f
+                ) * 60f;
         }
 
-        // 3. Procesar Input Horizontal (Yaw/Roll)
-        float factorGiro = 0f;
-        float rollVisual = 0f;
+        float roll = 0;
 
-        if (Mathf.Abs(yawHead) > zonaMuertaGrados)
+        if (Mathf.Abs(yaw) > zonaMuertaGrados)
         {
-            // Mapeo de intensidad de giro según desviación del cuello
-            float inputHorizontal = Mathf.Clamp(yawHead / limiteGiroHorizontal, -1f, 1f);
-            
-            // Agilidad inversamente proporcional a la velocidad
-            float agilidad = Mathf.Lerp(80f, 25f, velocidadActual / velocidadMaxima);
-            
-            factorGiro = inputHorizontal * agilidad;
-            rollVisual = inputHorizontal * 45f; // Inclinación estética
-            
-            yawAcumulado += factorGiro * Time.deltaTime;
+            float horizontal =
+                Mathf.Clamp(
+                    yaw / limiteGiroHorizontal,
+                    -1f,
+                    1f
+                );
+
+            yawAcumulado +=
+                horizontal *
+                60 *
+                Time.deltaTime;
+
+            roll = horizontal * 25f;
         }
 
-        // 4. Aplicar rotación al cuerpo (Rig)
-        // La rotación en X y Z es temporal por el "input", el Yaw es acumulativo
-        Quaternion rotTarget = Quaternion.Euler(pitchFinal, yawAcumulado, -rollVisual);
-        transform.rotation = Quaternion.Slerp(transform.rotation, rotTarget, suavizadoGiro * Time.deltaTime);
+        Quaternion objetivo =
+            Quaternion.Euler(
+                pitchFinal,
+                yawAcumulado,
+                -roll
+            );
 
-        // 5. Movimiento
-        transform.position += transform.forward * velocidadActual * Time.deltaTime;
+        transform.rotation =
+            Quaternion.Slerp(
+                transform.rotation,
+                objetivo,
+                suavizadoGiro * Time.deltaTime
+            );
+
+        rb.linearVelocity =
+            transform.forward *
+            velocidadActual;
     }
+
     void ModoTestingPC()
     {
-        // 🔶 MOVIMIENTO (WASD + subir/bajar)
-        float h = Input.GetAxis("Horizontal"); // A D
-        float v = Input.GetAxis("Vertical");   // W S
+        float h = Input.GetAxis("Horizontal");
+        float v = Input.GetAxis("Vertical");
 
-        float subir = 0f;
-        if (Input.GetKey(KeyCode.Space)) subir = 1f;
-        if (Input.GetKey(KeyCode.LeftControl)) subir = -1f;
+        float mouseX =
+            Input.GetAxis("Mouse X") *
+            sensibilidadMouse;
 
-        Vector3 direccion = new Vector3(h, subir, v);
-        transform.Translate(direccion * velocidadMovimientoTesting * Time.deltaTime);
-
-        // 🔶 ROTACIÓN CON MOUSE
-        float mouseX = Input.GetAxis("Mouse X") * sensibilidadMouse * 100f * Time.deltaTime;
-        float mouseY = Input.GetAxis("Mouse Y") * sensibilidadMouse * 100f * Time.deltaTime;
+        float mouseY =
+            Input.GetAxis("Mouse Y") *
+            sensibilidadMouse;
 
         rotacionY += mouseX;
         rotacionX -= mouseY;
-        rotacionX = Mathf.Clamp(rotacionX, -80f, 80f);
 
-        transform.rotation = Quaternion.Euler(rotacionX, rotacionY, 0f);
+        rotacionX = Mathf.Clamp(
+            rotacionX,
+            -80,
+            80
+        );
+
+        transform.rotation =
+            Quaternion.Euler(
+                rotacionX,
+                rotacionY,
+                0
+            );
+
+        transform.Translate(
+            new Vector3(h, 0, v) *
+            velocidadMovimientoTesting *
+            Time.deltaTime
+        );
     }
 }
