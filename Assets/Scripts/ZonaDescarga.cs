@@ -1,4 +1,5 @@
 using UnityEngine;
+using UnityEngine.InputSystem;
 
 public class ZonaDescarga : MonoBehaviour
 {
@@ -18,14 +19,26 @@ public class ZonaDescarga : MonoBehaviour
     [Header("Destino")]
     public Transform destinoCaida;
 
-    [Header("Input")]
-    public KeyCode teclaDescarga = KeyCode.X;
+    [Header("Input VR")]
+    public InputActionProperty descargaAction;
 
     [Header("Debug")]
     public int nivelZona = 1;
 
     private bool enZona = false;
+    private bool descargaEnProceso = false;
+
     private CanvasGroup canvasGroup;
+
+    void OnEnable()
+    {
+        descargaAction.action?.Enable();
+    }
+
+    void OnDisable()
+    {
+        descargaAction.action?.Disable();
+    }
 
     void Start()
     {
@@ -58,9 +71,12 @@ public class ZonaDescarga : MonoBehaviour
             canvasGroup.alpha = Mathf.Lerp(canvasGroup.alpha, objetivo, Time.deltaTime * 5f);
         }
 
-        if (enZona && Input.GetKeyDown(teclaDescarga))
+        if (enZona && !descargaEnProceso)
         {
-            EjecutarDescarga();
+            if (descargaAction.action.WasPressedThisFrame())
+            {
+                EjecutarDescarga();
+            }
         }
     }
 
@@ -94,18 +110,8 @@ public class ZonaDescarga : MonoBehaviour
     {
         Debug.Log("DESCARGA ACTIVADA");
 
-        enZona = false;
-
-        if (indicadorUI != null)
-            indicadorUI.SetActive(false);
-
-        if (overlayAmarillo != null)
-            overlayAmarillo.SetActive(false);
-
-        if (ventanaCamara != null)
-            ventanaCamara.SetActive(true);
-
         GameObject picoObj = GameObject.FindGameObjectWithTag("Pico");
+
         if (picoObj == null)
         {
             Debug.LogError("No se encontró el Pico");
@@ -120,9 +126,21 @@ public class ZonaDescarga : MonoBehaviour
 
         if (destinoCaida == null)
         {
-            Debug.LogError("No asignaste destinoCaida en el Inspector para esta zona.");
+            Debug.LogError("No asignaste destinoCaida en el Inspector.");
             return;
         }
+
+        // Solo marcar cuando todo está listo
+        descargaEnProceso = true;
+
+        if (indicadorUI != null)
+            indicadorUI.SetActive(false);
+
+        if (overlayAmarillo != null)
+            overlayAmarillo.SetActive(false);
+
+        if (ventanaCamara != null)
+            ventanaCamara.SetActive(true);
 
         camaraDescarga.Activar(
             picoObj.transform.position,
@@ -133,6 +151,9 @@ public class ZonaDescarga : MonoBehaviour
 
     public void FinalizarAnimacionDescarga()
     {
+        Debug.Log("FINALIZÓ ANIMACIÓN");
+        descargaEnProceso = false;
+
         if (ventanaCamara != null)
             ventanaCamara.SetActive(false);
 

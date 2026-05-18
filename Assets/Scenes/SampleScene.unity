@@ -322,7 +322,18 @@ MonoBehaviour:
   zonaNivel3: {fileID: 492028613}
   camaraDescarga: {fileID: 2075798133}
   destinoCaida: {fileID: 1133767115}
-  teclaDescarga: 120
+  descargaAction:
+    m_UseReference: 1
+    m_Action:
+      m_Name: Descarga
+      m_Type: 0
+      m_ExpectedControlType: 
+      m_Id: 1ea02233-e271-4dbc-9f38-041829f53b01
+      m_Processors: 
+      m_Interactions: 
+      m_SingletonActionBindings: []
+      m_Flags: 0
+    m_Reference: {fileID: 7904272356298805229, guid: c348712bda248c246b8c49b3db54643f, type: 3}
   nivelZona: 1
 --- !u!1 &271267875 stripped
 GameObject:
@@ -658,7 +669,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::VueloPalomaGaze
   camaraHead: {fileID: 328232097}
   velocidadBase: 5
-  velocidadMaxima: 30
+  velocidadMaxima: 25
   suavizadoGiro: 3
   zonaMuertaGrados: 5
   limiteGiroHorizontal: 60
@@ -686,7 +697,7 @@ MonoBehaviour:
       m_Interactions: 
       m_SingletonActionBindings: []
       m_Flags: 0
-    m_Reference: {fileID: -1758520528963094988, guid: c348712bda248c246b8c49b3db54643f, type: 3}
+    m_Reference: {fileID: 6558622148059887818, guid: c348712bda248c246b8c49b3db54643f, type: 3}
   usarModoTesting: 0
   velocidadMovimientoTesting: 10
   sensibilidadMouse: 2
@@ -997,7 +1008,18 @@ MonoBehaviour:
   zonaNivel3: {fileID: 492028613}
   camaraDescarga: {fileID: 2075798133}
   destinoCaida: {fileID: 432720601}
-  teclaDescarga: 120
+  descargaAction:
+    m_UseReference: 0
+    m_Action:
+      m_Name: 
+      m_Type: 0
+      m_ExpectedControlType: 
+      m_Id: 95fe7963-2ca4-4bd1-9054-117471dda0d5
+      m_Processors: 
+      m_Interactions: 
+      m_SingletonActionBindings: []
+      m_Flags: 0
+    m_Reference: {fileID: 0}
   nivelZona: 3
 --- !u!136 &492028616
 CapsuleCollider:
@@ -1395,7 +1417,7 @@ GameObject:
   m_Component:
   - component: {fileID: 988732286}
   m_Layer: 0
-  m_Name: DestunoNivel3
+  m_Name: DestinoNivel3
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -2023,7 +2045,18 @@ MonoBehaviour:
   zonaNivel3: {fileID: 492028613}
   camaraDescarga: {fileID: 2075798133}
   destinoCaida: {fileID: 1077506266}
-  teclaDescarga: 120
+  descargaAction:
+    m_UseReference: 0
+    m_Action:
+      m_Name: 
+      m_Type: 0
+      m_ExpectedControlType: 
+      m_Id: 83593f48-26ea-4cf0-b1b7-daaf6b770014
+      m_Processors: 
+      m_Interactions: 
+      m_SingletonActionBindings: []
+      m_Flags: 0
+    m_Reference: {fileID: 0}
   nivelZona: 2
 --- !u!136 &1679904838
 CapsuleCollider:

@@ -81,38 +81,44 @@ public class VueloPalomaGaze : MonoBehaviour
 
     void ManejarVelocidad()
     {
+        // Leer joystick izquierdo (Vector2)
         Vector2 move = acelerarAction.action.ReadValue<Vector2>();
 
-        // adelante joystick = +1
-        float avance = move.y;
+        // Solo usar adelante/atrás
+        float avance = Mathf.Clamp(move.y, 0f, 1f);
 
-        float objetivo = velocidadBase;
-
-        if (avance > 0.1f)
-        {
-            objetivo = Mathf.Lerp(
+        // Velocidad según cuánto empujes el joystick
+        float velocidadJoystick =
+            Mathf.Lerp(
                 velocidadBase,
                 velocidadMaxima,
                 avance
             );
-        }
 
-        float freno = desacelerarAction.action.ReadValue<float>();
+        // Leer gatillo izquierdo
+        float freno =
+            desacelerarAction.action.ReadValue<float>();
 
-        if (freno > 0.1f)
+        // Aplicar frenado
+        float objetivo = velocidadJoystick;
+
+        if (freno > 0.05f)
         {
-            objetivo = Mathf.Lerp(
-                velocidadBase,
-                0,
-                freno
-            );
+            objetivo =
+                Mathf.Lerp(
+                    velocidadJoystick,
+                    0f,
+                    freno
+                );
         }
 
-        velocidadActual = Mathf.MoveTowards(
-            velocidadActual,
-            objetivo,
-            10f * Time.deltaTime
-        );
+        // Suavizar cambios
+        velocidadActual =
+            Mathf.Lerp(
+                velocidadActual,
+                objetivo,
+                3f * Time.deltaTime
+            );
     }
 
     void ManejarDireccionGaze()
