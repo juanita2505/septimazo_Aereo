@@ -1,0 +1,1 @@
+C:\Users\Usuario\Documents\GitHub\septimazo_Aereo\Library\Bee\Android\Prj\IL2CPP\Gradle\unityLibrary\build\intermediates\cxx\RelWithDebInfo\qz3d166q\obj\arm64-v8a
