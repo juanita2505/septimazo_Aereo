@@ -58,6 +58,7 @@ public class VRButtonHover : MonoBehaviour,
     public void OnPointerEnter(PointerEventData eventData)
     {
         targetScale = originalScale * hoverScale;
+        Debug.Log($"Hover! originalScale:{originalScale} targetScale:{targetScale}");
 
         if (buttonImage != null)
             buttonImage.color = hoverColor;

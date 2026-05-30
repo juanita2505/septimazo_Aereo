@@ -1,2 +1,32 @@
 fileFormatVersion: 2
 guid: 67f15ae5da2a2c84986d693777eb1c44
+MonoImporter:
+  externalObjects: {}
+  serializedVersion: 2
+  defaultReferences:
+  - controlVuelo: {instanceID: 0}
+  - canvasTutorial: {instanceID: 0}
+  - camaraHead: {instanceID: 0}
+  - textoTitulo: {instanceID: 0}
+  - textoInstruccion: {instanceID: 0}
+  - textoSubtitulo: {instanceID: 0}
+  - textoContador: {instanceID: 0}
+  - textoPasoNumero: {instanceID: 0}
+  - textoDebug: {instanceID: 0}
+  - barraProgreso: {instanceID: 0}
+  - iconoMovimiento: {instanceID: 0}
+  - panelCompletado: {instanceID: 0}
+  - panelTutorialCompleto: {instanceID: 0}
+  - iconoCabezaIzquierda: {fileID: 21300000, guid: 243b97496e792b34eb2655283fc052bf, type: 3}
+  - iconoCabezaDerecha: {fileID: 21300000, guid: 6604f1ef76b180743b98024d8c3b720f, type: 3}
+  - iconoCabezaArriba: {instanceID: 0}
+  - iconoCabezaAbajo: {instanceID: 0}
+  - iconoJoystickAdelante: {instanceID: 0}
+  - iconoFreno: {instanceID: 0}
+  - iconoDescarga: {instanceID: 0}
+  - iconoCombinado: {instanceID: 0}
+  executionOrder: 0
+  icon: {instanceID: 0}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
