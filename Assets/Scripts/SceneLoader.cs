@@ -5,7 +5,9 @@ public class SceneLoader : MonoBehaviour
 {
     public void CargarEscena(string nombreEscena)
     {
-        SceneManager.LoadScene(nombreEscena);
+        PlayerPrefs.SetString("EscenaDestino", nombreEscena);
+        PlayerPrefs.Save();
+        SceneManager.LoadScene("SceneCarga");
     }
 
     public void SalirJuego()
