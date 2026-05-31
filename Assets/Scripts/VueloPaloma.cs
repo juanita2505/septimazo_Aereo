@@ -81,6 +81,7 @@ public class VueloPalomaGaze : MonoBehaviour
 
     void ManejarVelocidad()
     {
+
         // Leer joystick izquierdo (Vector2)
         Vector2 move = acelerarAction.action.ReadValue<Vector2>();
 
@@ -98,6 +99,7 @@ public class VueloPalomaGaze : MonoBehaviour
         // Leer gatillo izquierdo
         float freno =
             desacelerarAction.action.ReadValue<float>();
+
 
         // Aplicar frenado
         float objetivo = velocidadJoystick;
