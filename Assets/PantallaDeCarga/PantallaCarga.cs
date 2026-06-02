@@ -53,7 +53,8 @@ public class PantallaCarga : MonoBehaviour
 
         while (tiempoTranscurrido < tiempoTotal)
         {
-            tiempoTranscurrido += Time.deltaTime;
+            tiempoTranscurrido += Time.unscaledDeltaTime; // <- cambiado
+
             float progresoVisual = Mathf.Clamp01(tiempoTranscurrido / tiempoTotal);
 
             if (barraProgreso != null)
@@ -64,19 +65,13 @@ public class PantallaCarga : MonoBehaviour
             yield return null;
         }
 
-        // Llega al 100%
         if (barraProgreso != null) barraProgreso.fillAmount = 1f;
         if (textoPorcentaje != null) textoPorcentaje.text = "100%";
 
-        // Detiene la animacin de puntos clave
-        if (coroutinaTexto != null)
-            StopCoroutine(coroutinaTexto);
+        if (coroutinaTexto != null) StopCoroutine(coroutinaTexto);
+        if (textoCargando != null) textoCargando.text = "A volar!";
 
-        // Muestra "A volar" el tiempo que quieras
-        if (textoCargando != null)
-            textoCargando.text = "¡A volar!";
-
-        yield return new WaitForSeconds(tiempoMostrarListo);
+        yield return new WaitForSecondsRealtime(tiempoMostrarListo); // <- cambiado
         op.allowSceneActivation = true;
     }
 }

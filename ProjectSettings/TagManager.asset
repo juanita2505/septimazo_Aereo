@@ -6,6 +6,9 @@ TagManager:
   tags:
   - Anchor
   - Pico
+  - ZonaVerde
+  - ZonaAmarilla
+  - ZonaRoja
   layers:
   - Default
   - TransparentFX
